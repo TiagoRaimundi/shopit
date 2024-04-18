@@ -15,17 +15,10 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: [true, "Please enter product name"],
     },
-    ratings: [{
-        public_id:{
-            type: String,
-            required: true
-        },
-        url: {
-            type: String,
-            required: true
-        },
-    }
-],
+    ratings: {
+        type: Number,
+        default: 0
+    },
     images: [
         {
             public_id: String,
@@ -90,7 +83,7 @@ const productSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: true
+        required: false
     },
 
 }, {timestamps: true})
