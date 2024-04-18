@@ -1,8 +1,13 @@
 import express from 'express'
 const app = express();
 import dotenv from 'dotenv'
+import { connectDatabase } from './config/dbConnect.js';
 
 dotenv.config({path: 'backend/config/config.env'});
+
+//Connecting to database
+
+connectDatabase();
 
 //Import all routes
 import productRoutes from "./routes/products.js"
