@@ -1,3 +1,4 @@
+import product from "../models/product.js";
 import Product from "../models/product.js";
 
 //Create new Product => /api/v1/products
@@ -17,4 +18,21 @@ export const newProduct = async (req, res) => {
      res.status(200).json({
         product,
      })
+}
+
+
+//Get single Product details => /api/v1/products/:id
+export const getProductsDetails = async (req, res) => {
+
+    const product = await Product.findById(req?.params?.id) 
+    
+    if(!product) {
+        return res.status(404).json({
+            error: 'Product not found',
+        })
+    }
+
+    res.status(200).json({
+        product
+    })
 }
