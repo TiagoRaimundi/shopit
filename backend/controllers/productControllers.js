@@ -6,13 +6,18 @@ import ErrorHandler from "../utils/errorHandler.js";
 //Create new Product => /api/v1/products
 export const getProducts = catchAsyncErrors(async (req, res) => {
 
+    const resPerPage = 4
+
     const apiFilters = new APIFilters(Product, req.query).search().filters();
 
     let products = await apiFilters.query
     let filteredProductsCount = products.length
 
+    apiFilters.pagination(resPerPage)
+    products = await apiFilters.query.clone()
     
     res.status(200).json({
+        resPerPage,
         filteredProductsCount,
         products,
     })
