@@ -4,6 +4,14 @@ import dotenv from 'dotenv'
 import { connectDatabase } from './config/dbConnect.js';
 import errorMiddleware from "./middleware/error.js"
 
+
+//Handle Uncaugth exceptions 
+process.on('uncaughtException', (err) => {
+    console.log(`ERROR: ${err}`);
+    console.log('Shuting down due to uncaught exception')
+    process.exit(1);
+});
+
 dotenv.config({path: 'backend/config/config.env'});
 
 //Connecting to database
@@ -11,6 +19,8 @@ dotenv.config({path: 'backend/config/config.env'});
 connectDatabase();
 
 app.use(express.json());
+
+
 //Import all routes
 import productRoutes from "./routes/products.js"
 
