@@ -10,7 +10,12 @@ const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, 'Please enter your email'],
-        unique: true,
+   
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true
     },
     password: {
         type: String,
@@ -50,5 +55,9 @@ userSchema.methods.getJwtToken = function() {
     });
 }
 
+//Compare user password
+userSchema.methods.comparePassword = async function(enteredPassword){
+    return await bcrypt.compare(enteredPassword, this.password)
+}
 
 export default mongoose.model("User", userSchema);
