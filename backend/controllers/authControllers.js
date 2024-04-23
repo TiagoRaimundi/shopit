@@ -1,6 +1,8 @@
 import catchAsyncErrors from "../middleware/catchAsyncErrors.js";
 import User from "../models/user.js";
+import { getResetPasswordTemplate } from "../utils/emailTemplate.js";
 import ErrorHandler from "../utils/errorHandler.js";
+import sendEmail from "../utils/sendEmail.js";
 import sendToken from "../utils/sendToken.js";
 
 
@@ -60,3 +62,39 @@ export const logoutUser = catchAsyncErrors(async (req, res, next) => {
         message: "Logged Out",
     })
 })
+
+
+//forgot password => /api/v1/login
+export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
+    // Encontrar usuário no banco de dados
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+        return next(new ErrorHandler('User not found with this email', 404));
+    }
+
+    // Obter o token de redefinição de senha
+    const resetToken = user.getResetPasswordToken(); 
+    await user.save(); // Salvar o token no banco de dados
+
+    // Criar URL de redefinição de senha
+    const resetUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
+    const message = getResetPasswordTemplate(user.name, resetUrl);
+
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: 'ShopIt password recovery',
+            message,
+        });
+
+        res.status(200).json({
+            message: `Email sent to: ${user.email}`
+        });
+    } catch (error) {
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save(); // Garantir que a limpeza é salva no DB
+        return next(new ErrorHandler('Email could not be sent.', 500));
+    }
+});
