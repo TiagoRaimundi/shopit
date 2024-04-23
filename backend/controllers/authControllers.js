@@ -4,7 +4,7 @@ import { getResetPasswordTemplate } from "../utils/emailTemplate.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import sendEmail from "../utils/sendEmail.js";
 import sendToken from "../utils/sendToken.js";
-import crypto from "crypto"
+import crypto from "crypto";
 
 //Register user => /api/v1/register
 export const registerUser = catchAsyncErrors(async (req, res, next) => {
@@ -97,40 +97,44 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
 
 //reset password => /api/v1/password/reset/: token
 export const resetPassword = catchAsyncErrors(async (req, res, next) => {
-    // Hash do token recebido pela URL
-    const resetPasswordToken = crypto
-      .createHash('sha256')
-      .update(req.params.token)
-      .digest('hex');
-  
-    // Procurar usuário com o token de redefinição de senha e que ainda não expirou
-    const user = await User.findOne({
-      resetPasswordToken,
-      resetPasswordExpire: { $gt: Date.now() },
-    });
-  
-    // Verificar se encontrou algum usuário
-    if (!user) {
-      return next(new ErrorHandler('Password reset token is invalid or has been expired', 400));
-    }
-  
-    // Verificar se as senhas correspondem
-    if (req.body.password !== req.body.confirmPassword) {
-      return next(new ErrorHandler('Password does not match', 400));
-    }
-  
-    // Definir a nova senha e limpar os campos de token e expiração
-    user.password = req.body.password;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
-  
-    // Salvar as alterações no banco de dados
-    await user.save();
-  
-    // Enviar resposta de sucesso
-    res.status(200).json({
-      success: true,
-      message: 'Password has been reset successfully',
-    });
+  // Hash do token recebido pela URL
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  // Procurar usuário com o token de redefinição de senha e que ainda não expirou
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
   });
-  
+
+  // Verificar se encontrou algum usuário
+  if (!user) {
+    return next(
+      new ErrorHandler(
+        "Password reset token is invalid or has been expired",
+        400
+      )
+    );
+  }
+
+  // Verificar se as senhas correspondem
+  if (req.body.password !== req.body.confirmPassword) {
+    return next(new ErrorHandler("Password does not match", 400));
+  }
+
+  // Definir a nova senha e limpar os campos de token e expiração
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  // Salvar as alterações no banco de dados
+  await user.save();
+
+  // Enviar resposta de sucesso
+  res.status(200).json({
+    success: true,
+    message: "Password has been reset successfully",
+  });
+});
