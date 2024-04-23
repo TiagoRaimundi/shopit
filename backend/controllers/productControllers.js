@@ -86,3 +86,4 @@ export const deleteProduct = catchAsyncErrors(async (req, res) => {
         message: 'Product deleted'
     })
 })
+
