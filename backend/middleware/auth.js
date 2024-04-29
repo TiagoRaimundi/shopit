@@ -8,15 +8,24 @@ import User from "../models/user.js";
 export const isAuthenticatedUser = catchAsyncErrors(async (req, res, next) => {
     const { token } = req.cookies;
 
-    if(!token){
-        return next(new ErrorHandler('Login first to acess this resource', 401));
+    if (!token) {
+        return next(new ErrorHandler('Login first to access this resource', 401));
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    req.user = await User.findById(decoded.id)
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    next();
-}) 
+        const user = await User.findById(decoded.id);
+        if (!user) {
+            return next(new ErrorHandler('No user found with this id', 401));
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        return next(new ErrorHandler('Not authorized to access this resource', 401));
+    }
+});
 
 //AUthorize user roles
 
