@@ -85,7 +85,6 @@ export const updateOrder = catchAsyncErrors(async(req, res, next) => {
         return next(new ErrorHandler("You have already delivered this order", 400));
     }
 
-    //update products stock
     order?.orderItems?.forEach(async(item) => {
         const product = await Product.findById(item?.product?.toString())
         if(!product){
@@ -102,6 +101,19 @@ export const updateOrder = catchAsyncErrors(async(req, res, next) => {
 
     res.status(200).json({
         success: true,
-        
+    })
+})
+
+export const deleteOrder = catchAsyncErrors(async(req, res, next) => {
+    const order = await Order.findById(req.params.id)
+
+    if(!order){
+        return next(new ErrorHandler('Not order found with this id', 404))
+    }
+
+    await order.deleteOne()
+
+    res.status(200).json({
+        success: true
     })
 })
